@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Yggdrasil - Selecionar Ordem{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="custom-card p-4 animate-slide-up text-center">
+            <h2 class="fw-bold text-primary mb-4">Como deseja ordenar as questões?</h2>
+            
+            <p class="lead mb-4">Escolha como as questões de <strong>{{ nome_referencia }}</strong> serão apresentadas:</p>
+            
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body d-flex flex-column">
+                            <div class="text-center mb-3">
+                                <i class="fas fa-random fa-4x text-primary mb-3"></i>
+                                <h4>Ordem Aleatória</h4>
+                            </div>
+                            <p class="text-muted flex-grow-1">As questões serão apresentadas em ordem completamente aleatória, independente da data de próxima revisão.</p>
+                            <a href="{{ url_for('aleatorio', modo=modo, id_ref=id_ref, ordem='aleatoria') }}" class="btn btn-primary mt-3">
+                                <i class="fas fa-dice me-2"></i> Escolher Aleatória
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body d-flex flex-column">
+                            <div class="text-center mb-3">
+                                <i class="fas fa-calendar-alt fa-4x text-success mb-3"></i>
+                                <h4>Por Próxima Data</h4>
+                            </div>
+                            <p class="text-muted flex-grow-1">As questões serão ordenadas da mais urgente para a menos urgente, de acordo com a data de próxima revisão.</p>
+                            <a href="{{ url_for('aleatorio', modo=modo, id_ref=id_ref, ordem='proxima_data') }}" class="btn btn-success mt-3">
+                                <i class="fas fa-sort-amount-down me-2"></i> Escolher Por Data
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i> Voltar
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

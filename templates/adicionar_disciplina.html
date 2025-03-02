@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Yggdrasil - Adicionar Disciplina{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="custom-card p-4 animate-slide-up">
+            <h2 class="fw-bold text-primary mb-4">Adicionar Disciplina</h2>
+            
+            <form action="{{ url_for('adicionar_disciplina') }}" method="post">
+                <div class="mb-4">
+                    <label for="nome" class="form-label fw-bold">Nome da Disciplina *</label>
+                    <input type="text" class="form-control" id="nome" name="nome" required>
+                    <div class="form-text">Ex: Direito Constitucional, Português, Matemática, etc.</div>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-save me-2"></i> Salvar Disciplina
+                    </button>
+                    <a href="{{ url_for('gerenciar') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i> Voltar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

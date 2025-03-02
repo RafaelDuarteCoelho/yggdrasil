@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %}Yggdrasil - {{ topico.nome }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="fw-bold text-primary mb-0">{{ topico.nome }}</h1>
+        <p class="text-muted">
+            <a href="{{ url_for('ver_disciplina', disciplina_id=topico.disciplina_id) }}" class="text-decoration-none">
+                <i class="fas fa-arrow-left me-1"></i> {{ topico.disciplina.nome }}
+            </a> | {{ topico.questoes|length }} questões cadastradas
+        </p>
+    </div>
+    <a href="{{ url_for('ver_disciplina', disciplina_id=topico.disciplina_id) }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i> Voltar
+    </a>
+</div>
+
+<!-- Card de estatísticas -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <h5 class="card-title fw-bold mb-3"><i class="fas fa-chart-bar me-2"></i> Estatísticas do Tópico</h5>
+        
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <p class="text-muted mb-1">Percentual de acertos</p>
+                    <div class="progress mb-1">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ topico.estatisticas.acertos_percentual }}%;" 
+                            aria-valuenow="{{ topico.estatisticas.acertos_percentual }}" aria-valuemin="0" aria-valuemax="100">
+                            {{ topico.estatisticas.acertos_percentual }}%
+                        </div>
+                    </div>
+                    <small class="text-muted">{{ topico.estatisticas.questoes_acertadas }} de {{ topico.estatisticas.total_questoes }} questões acertadas</small>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <p class="text-muted mb-1">Erros por questão</p>
+                    <div class="d-flex align-items-center">
+                        <div class="progress flex-grow-1 me-2">
+                            <div class="progress-bar bg-danger" role="progressbar" 
+                                style="width: {{ min(100, topico.estatisticas.erros_por_questao * 20) }}%;" 
+                                aria-valuenow="{{ topico.estatisticas.erros_por_questao }}" aria-valuemin="0" aria-valuemax="5">
+                            </div>
+                        </div>
+                        <span class="fw-bold">{{ topico.estatisticas.erros_por_questao }}</span>
+                    </div>
+                    <small class="text-muted">Total de {{ topico.estatisticas.total_erros }} erros</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="d-grid gap-2 mt-3">
+            <a href="{{ url_for('escolher_ordem', modo='topico', id_ref=topico.id) }}" class="btn btn-primary">
+                <i class="fas fa-play-circle me-2"></i> Praticar este tópico
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de questões -->
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <h5 class="card-title fw-bold mb-3"><i class="fas fa-list me-2"></i> Questões deste Tópico</h5>
+        
+        {% if topico.questoes %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Enunciado</th>
+                            <th scope="col">Gabarito</th>
+                            <th scope="col">Acertos / Erros</th>
+                            <th scope="col">Próxima revisão</th>
+                            <th scope="col">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for questao in topico.questoes %}
+                            <tr>
+                                <td>{{ questao.id }}</td>
+                                <td>
+                                    <div style="max-width: 300px; max-height: 100px; overflow: hidden; text-overflow: ellipsis;">
+                                        {{ questao.enunciado|truncate(100) }}
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if questao.gabarito %}
+                                        <span class="badge bg-success">CERTO</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">ERRADO</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ questao.numero_acertos }} / {{ questao.numero_erros }}</td>
+                                <td>{{ questao.proxima_data.strftime('%d/%m/%Y') }}</td>
+                                <td>
+                                    <a href="{{ url_for('editar_questao', questao_id=questao.id) }}" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info mb-0">
+                <h5 class="alert-heading">Nenhuma questão cadastrada!</h5>
+                <p class="mb-0">Este tópico ainda não possui questões. Adicione questões para começar a praticar.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

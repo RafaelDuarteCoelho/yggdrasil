@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+
+{% block title %}Yggdrasil - Configurações{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="custom-card p-4 animate-slide-up">
+            <h2 class="fw-bold text-primary mb-4">Configurações de Revisão Espaçada</h2>
+            
+            <form action="{{ url_for('configuracoes') }}" method="post">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title text-success mb-3"><i class="fas fa-check-circle me-2"></i> Dias para próxima revisão ao ACERTAR</h5>
+                        <p class="text-muted">Configure o intervalo de dias para próxima revisão quando você acertar uma questão, conforme seu nível de confiança.</p>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Certeza</label>
+                                <div class="input-group mb-2">
+                                    <span class="input-group-text">De</span>
+                                    <input type="number" class="form-control" id="dias_acerto_certeza_min" name="dias_acerto_certeza_min" 
+                                        min="1" max="365" value="{{ config.dias_acerto_certeza_min }}" required>
+                                    <span class="input-group-text">dias</span>
+                                </div>
+                                <div class="input-group">
+                                    <span class="input-group-text">Até</span>
+                                    <input type="number" class="form-control" id="dias_acerto_certeza_max" name="dias_acerto_certeza_max" 
+                                        min="1" max="365" value="{{ config.dias_acerto_certeza_max }}" required>
+                                    <span class="input-group-text">dias</span>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Confiante</label>
+                                <div class="input-group mb-2">
+                                    <span class="input-group-text">De</span>
+                                    <input type="number" class="form-control" id="dias_acerto_confiante_min" name="dias_acerto_confiante_min" 
+                                        min="1" max="365" value="{{ config.dias_acerto_confiante_min }}" required>
+                                    <span class="input-group-text">dias</span>
+                                </div>
+                                <div class="input-group">
+                                    <span class="input-group-text">Até</span>
+                                    <input type="number" class="form-control" id="dias_acerto_confiante_max" name="dias_acerto_confiante_max" 
+                                        min="1" max="365" value="{{ config.dias_acerto_confiante_max }}" required>
+                                    <span class="input-group-text">dias</span>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Dúvida</label>
+                                <div class="input-group mb-2">
+                                    <span class="input-group-text">De</span>
+                                    <input type="number" class="form-control" id="dias_acerto_duvida_min" name="dias_acerto_duvida_min" 
+                                        min="1" max="365" value="{{ config.dias_acerto_duvida_min }}" required>
+                                    <span class="input-group-text">dias</span>
+                                </div>
+                                <div class="input-group">
+                                    <span class="input-group-text">Até</span>
+                                    <input type="number" class="form-control" id="dias_acerto_duvida_max" name="dias_acerto_duvida_max" 
+                                        min="1" max="365" value="{{ config.dias_acerto_duvida_max }}" required>
+                                    <span class="input-group-text">dias</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info mt-3 mb-0">
+                            <i class="fas fa-info-circle me-2"></i> O sistema escolherá aleatoriamente um valor dentro destes intervalos e ajustará baseado no histórico de acertos/erros da questão.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title text-danger mb-3"><i class="fas fa-times-circle me-2"></i> Dias para próxima revisão ao ERRAR</h5>
+                        <p class="text-muted">Configure quantos dias esperar até a próxima revisão quando você errar uma questão, conforme seu nível de confiança.</p>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="dias_erro_certeza" class="form-label fw-bold">Certeza</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="dias_erro_certeza" name="dias_erro_certeza" 
+                                        min="1" max="365" value="{{ config.dias_erro_certeza }}" required>
+                                    <span class="input-group-text">dias</span>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label for="dias_erro_confiante" class="form-label fw-bold">Confiante</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="dias_erro_confiante" name="dias_erro_confiante" 
+                                        min="1" max="365" value="{{ config.dias_erro_confiante }}" required>
+                                    <span class="input-group-text">dias</span>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label for="dias_erro_duvida" class="form-label fw-bold">Dúvida</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="dias_erro_duvida" name="dias_erro_duvida" 
+                                        min="1" max="365" value="{{ config.dias_erro_duvida }}" required>
+                                    <span class="input-group-text">dias</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info mt-3 mb-0">
+                            <i class="fas fa-info-circle me-2"></i> O sistema reduzirá estes valores se você tiver um histórico de muitos erros na questão.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3"><i class="fas fa-cog me-2"></i> Outras Configurações</h5>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="questoes_por_pagina" class="form-label fw-bold">Questões por página</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="questoes_por_pagina" name="questoes_por_pagina" 
+                                        min="5" max="100" value="{{ config.questoes_por_pagina }}" required>
+                                    <span class="input-group-text">questões</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-save me-2"></i> Salvar Configurações
+                    </button>
+                    <a href="{{ url_for('gerenciar') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i> Voltar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Validação para não deixar min maior que max
+        $('form').submit(function(e) {
+            // Verificar ranges
+            if (parseInt($('#dias_acerto_certeza_min').val()) > parseInt($('#dias_acerto_certeza_max').val())) {
+                e.preventDefault();
+                showAlert('O valor mínimo não pode ser maior que o valor máximo para acerto com certeza!', 'warning');
+                return false;
+            }
+            
+            if (parseInt($('#dias_acerto_confiante_min').val()) > parseInt($('#dias_acerto_confiante_max').val())) {
+                e.preventDefault();
+                showAlert('O valor mínimo não pode ser maior que o valor máximo para acerto confiante!', 'warning');
+                return false;
+            }
+            
+            if (parseInt($('#dias_acerto_duvida_min').val()) > parseInt($('#dias_acerto_duvida_max').val())) {
+                e.preventDefault();
+                showAlert('O valor mínimo não pode ser maior que o valor máximo para acerto com dúvida!', 'warning');
+                return false;
+            }
+            
+            return true;
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block title %}Yggdrasil - Importar Questões{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="custom-card p-4 animate-slide-up">
+            <h2 class="fw-bold text-primary mb-4">Importar Questões em Lote</h2>
+            
+            <div class="alert alert-info mb-4">
+                <h5 class="alert-heading"><i class="fas fa-info-circle me-2"></i> Informações Importantes</h5>
+                <p>Para importar questões em lote, você precisa de um arquivo CSV ou XLSX com as seguintes colunas:</p>
+                <ul>
+                    <li><strong>enunciado</strong>: Texto da questão</li>
+                    <li><strong>gabarito</strong>: "CERTO" ou "ERRADO" (ou "TRUE"/"FALSE", "V"/"F", "1"/"0")</li>
+                    <li><strong>justificativa</strong>: Explicação da resposta</li>
+                </ul>
+                <p class="mb-0">Todas as questões serão associadas à disciplina e ao tópico selecionados abaixo.</p>
+            </div>
+            
+            <form action="{{ url_for('importar') }}" method="post" enctype="multipart/form-data">
+                <!-- Disciplina e Tópico -->
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <label for="disciplina_id" class="form-label fw-bold">Disciplina *</label>
+                        <select class="form-select" id="disciplina_id" name="disciplina_id" required>
+                            <option value="" selected disabled>Selecione a disciplina</option>
+                            {% for disciplina in disciplinas %}
+                                <option value="{{ disciplina.id }}">{{ disciplina.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="topico_id" class="form-label fw-bold">Tópico *</label>
+                        <select class="form-select" id="topico_id" name="topico_id" required disabled>
+                            <option value="" selected disabled>Selecione a disciplina primeiro</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Arquivo -->
+                <div class="mb-4">
+                    <label for="arquivo" class="form-label fw-bold">Arquivo (CSV ou XLSX) *</label>
+                    <input class="form-control" type="file" id="arquivo" name="arquivo" accept=".csv, .xlsx" required>
+                </div>
+                
+                <!-- Template de exemplo -->
+                <div class="mb-4">
+                    <p class="fw-bold mb-2">Templates de exemplo:</p>
+                    <div class="d-flex gap-2">
+                        <a href="#" class="btn btn-sm btn-outline-secondary" onclick="downloadCSVTemplate(); return false;">
+                            <i class="fas fa-download me-1"></i> CSV Template
+                        </a>
+                        <a href="#" class="btn btn-sm btn-outline-secondary" onclick="downloadXLSXTemplate(); return false;">
+                            <i class="fas fa-download me-1"></i> XLSX Template
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-file-import me-2"></i> Importar Questões
+                    </button>
+                    <a href="{{ url_for('gerenciar') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i> Voltar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Quando a disciplina for selecionada, carregar os tópicos correspondentes
+        $('#disciplina_id').change(function() {
+            const disciplinaId = $(this).val();
+            
+            if (disciplinaId) {
+                // Habilitar o campo de tópico
+                $('#topico_id').prop('disabled', true);
+                $('#topico_id').html('<option value="" selected disabled>Carregando tópicos...</option>');
+                
+                // Carregar tópicos via AJAX
+                $.getJSON("{{ url_for('get_topicos', disciplina_id=0) }}".replace('0', disciplinaId), function(data) {
+                    let options = '<option value="" selected disabled>Selecione o tópico</option>';
+                    
+                    if (data.length > 0) {
+                        $.each(data, function(index, topico) {
+                            options += '<option value="' + topico.id + '">' + topico.nome + '</option>';
+                        });
+                    } else {
+                        options = '<option value="" selected disabled>Nenhum tópico encontrado</option>';
+                    }
+                    
+                    $('#topico_id').html(options);
+                    $('#topico_id').prop('disabled', false);
+                })
+                .fail(function() {
+                    $('#topico_id').html('<option value="" selected disabled>Erro ao carregar tópicos</option>');
+                });
+            } else {
+                $('#topico_id').html('<option value="" selected disabled>Selecione a disciplina primeiro</option>');
+                $('#topico_id').prop('disabled', true);
+            }
+        });
+    });
+    
+    // Função para criar e baixar template CSV
+    function downloadCSVTemplate() {
+        const csvContent = 'enunciado,gabarito,justificativa\n"A União, os Estados, o Distrito Federal e os Municípios poderão instituir taxas, em razão do exercício do poder de polícia ou pela utilização, efetiva ou potencial, de serviços públicos específicos e divisíveis, prestados ao contribuinte ou postos a sua disposição.",CERTO,"De acordo com o art. 145, II, da CF/88, a União, os Estados, o Distrito Federal e os Municípios poderão instituir taxas, em razão do exercício do poder de polícia ou pela utilização, efetiva ou potencial, de serviços públicos específicos e divisíveis, prestados ao contribuinte ou postos a sua disposição."\n"A inexistência de tributos não afeta o exercício pleno da liberdade de iniciativa.",ERRADO,"A afirmação está incorreta. Conforme o art. 170, IV, da CF/88, a ordem econômica é fundada na valorização do trabalho humano e na livre iniciativa, tendo por fim assegurar a todos existência digna, observados alguns princípios, entre eles a livre concorrência. A existência de tributos é essencial para financiar as atividades estatais e garantir a igualdade de condições entre os agentes econômicos."';
+        
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute('download', 'template_questoes.csv');
+        link.style.display = 'none';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+    
+    // Função para criar e baixar template XLSX (simulado como CSV)
+    function downloadXLSXTemplate() {
+        const csvContent = 'enunciado,gabarito,justificativa\n"A União, os Estados, o Distrito Federal e os Municípios poderão instituir taxas, em razão do exercício do poder de polícia ou pela utilização, efetiva ou potencial, de serviços públicos específicos e divisíveis, prestados ao contribuinte ou postos a sua disposição.",CERTO,"De acordo com o art. 145, II, da CF/88, a União, os Estados, o Distrito Federal e os Municípios poderão instituir taxas, em razão do exercício do poder de polícia ou pela utilização, efetiva ou potencial, de serviços públicos específicos e divisíveis, prestados ao contribuinte ou postos a sua disposição."\n"A inexistência de tributos não afeta o exercício pleno da liberdade de iniciativa.",ERRADO,"A afirmação está incorreta. Conforme o art. 170, IV, da CF/88, a ordem econômica é fundada na valorização do trabalho humano e na livre iniciativa, tendo por fim assegurar a todos existência digna, observados alguns princípios, entre eles a livre concorrência. A existência de tributos é essencial para financiar as atividades estatais e garantir a igualdade de condições entre os agentes econômicos."';
+        
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute('download', 'template_questoes.xlsx');
+        link.style.display = 'none';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>
+{% endblock %}

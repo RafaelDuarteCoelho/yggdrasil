@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}Yggdrasil - Gerenciamento{% endblock %}
+
+{% block content %}
+<h1 class="fw-bold text-primary mb-4">Gerenciamento</h1>
+
+<div class="row g-4">
+    <!-- Gerenciar Questões -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center">
+                <i class="fas fa-question-circle fa-4x text-primary mb-3"></i>
+                <h3 class="card-title fw-bold">Questões</h3>
+                <p class="card-text text-muted">
+                    Adicione, importe, edite ou remova questões do seu banco de dados.
+                </p>
+                <div class="d-grid gap-2 mt-4">
+                    <a href="{{ url_for('adicionar_questao') }}" class="btn btn-primary">
+                        <i class="fas fa-plus-circle me-2"></i> Adicionar Questão
+                    </a>
+                    <a href="{{ url_for('importar') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-file-import me-2"></i> Importar em Lote
+                    </a>
+                    <a href="{{ url_for('listar_questoes') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-list me-2"></i> Listar/Editar Questões
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gerenciar Disciplinas -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center">
+                <i class="fas fa-book fa-4x text-success mb-3"></i>
+                <h3 class="card-title fw-bold">Disciplinas</h3>
+                <p class="card-text text-muted">
+                    Organize seu estudo adicionando ou gerenciando disciplinas.
+                </p>
+                <div class="d-grid gap-2 mt-4">
+                    <a href="{{ url_for('adicionar_disciplina') }}" class="btn btn-success">
+                        <i class="fas fa-plus-circle me-2"></i> Adicionar Disciplina
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gerenciar Tópicos -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center">
+                <i class="fas fa-tags fa-4x text-warning mb-3"></i>
+                <h3 class="card-title fw-bold">Tópicos</h3>
+                <p class="card-text text-muted">
+                    Categorize suas questões com tópicos específicos dentro de cada disciplina.
+                </p>
+                <div class="d-grid gap-2 mt-4">
+                    <a href="{{ url_for('adicionar_topico') }}" class="btn btn-warning">
+                        <i class="fas fa-plus-circle me-2"></i> Adicionar Tópico
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Configurações -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center">
+                <i class="fas fa-cog fa-4x text-info mb-3"></i>
+                <h3 class="card-title fw-bold">Configurações</h3>
+                <p class="card-text text-muted">
+                    Personalize o sistema de revisão espaçada conforme suas necessidades.
+                </p>
+                <div class="d-grid gap-2 mt-4">
+                    <a href="{{ url_for('configuracoes') }}" class="btn btn-info text-white">
+                        <i class="fas fa-sliders-h me-2"></i> Ajustar Configurações
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

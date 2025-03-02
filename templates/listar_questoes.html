@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+
+{% block title %}Yggdrasil - Listar Questões{% endblock %}
+
+{% block content %}
+<h1 class="fw-bold text-primary mb-4">Listar Questões</h1>
+
+<!-- Filtros -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <h5 class="card-title mb-3"><i class="fas fa-filter me-2"></i> Filtros</h5>
+        
+        <form action="{{ url_for('listar_questoes') }}" method="get" id="filtro-form">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label for="disciplina_id" class="form-label">Disciplina</label>
+                    <select class="form-select" id="disciplina_id" name="disciplina_id">
+                        <option value="">Todas as disciplinas</option>
+                        {% for disciplina in disciplinas %}
+                            <option value="{{ disciplina.id }}" {% if request.args.get('disciplina_id')|int == disciplina.id %}selected{% endif %}>
+                                {{ disciplina.nome }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-4">
+                    <label for="topico_id" class="form-label">Tópico</label>
+                    <select class="form-select" id="topico_id" name="topico_id" {% if not request.args.get('disciplina_id') %}disabled{% endif %}>
+                        <option value="">Todos os tópicos</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-4">
+                    <label for="status" class="form-label">Status</label>
+                    <select class="form-select" id="status" name="status">
+                        <option value="" {% if not request.args.get('status') %}selected{% endif %}>Todos</option>
+                        <option value="ativas" {% if request.args.get('status') == 'ativas' %}selected{% endif %}>Apenas ativas</option>
+                        <option value="desativadas" {% if request.args.get('status') == 'desativadas' %}selected{% endif %}>Apenas desativadas</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search me-2"></i> Filtrar
+                </button>
+                <a href="{{ url_for('listar_questoes') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-sync-alt me-2"></i> Limpar filtros
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Lista de questões -->
+{% if questoes %}
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Disciplina</th>
+                    <th scope="col">Tópico</th>
+                    <th scope="col">Enunciado</th>
+                    <th scope="col">Gabarito</th>
+                    <th scope="col">Acertos</th>
+                    <th scope="col">Erros</th>
+                    <th scope="col">Última Data</th>
+                    <th scope="col">Próxima Data</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for questao in questoes %}
+                    <tr>
+                        <td>{{ questao.id }}</td>
+                        <td>{{ questao.disciplina.nome }}</td>
+                        <td>{{ questao.topico.nome }}</td>
+                        <td>
+                            <div style="max-width: 300px; max-height: 100px; overflow: hidden; text-overflow: ellipsis;">
+                                {{ questao.enunciado|truncate(100) }}
+                            </div>
+                        </td>
+                        <td>
+                            {% if questao.gabarito %}
+                                <span class="badge bg-success">CERTO</span>
+                            {% else %}
+                                <span class="badge bg-danger">ERRADO</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ questao.numero_acertos }}</td>
+                        <td>{{ questao.numero_erros }}</td>
+                        <td>{{ questao.ultima_data.strftime('%d/%m/%Y') }}</td>
+                        <td>{{ questao.proxima_data.strftime('%d/%m/%Y') }}</td>
+                        <td>
+                            {% if questao.status %}
+                                <span class="badge bg-success">Ativa</span>
+                            {% else %}
+                                <span class="badge bg-danger">Desativada</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group" aria-label="Ações">
+                                <a href="{{ url_for('editar_questao', questao_id=questao.id) }}" class="btn btn-sm btn-primary" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-{{ 'danger' if questao.status else 'success' }} toggle-status" 
+                                    data-questao-id="{{ questao.id }}" 
+                                    data-status="{{ questao.status }}" 
+                                    title="{{ 'Desativar' if questao.status else 'Ativar' }}">
+                                    {% if questao.status %}
+                                        <i class="fas fa-toggle-off"></i>
+                                    {% else %}
+                                        <i class="fas fa-toggle-on"></i>
+                                    {% endif %}
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        <h4 class="alert-heading">Nenhuma questão encontrada!</h4>
+        <p>Não há questões cadastradas com os filtros selecionados.</p>
+        <hr>
+        <div class="d-grid gap-2 d-md-flex">
+            <a href="{{ url_for('adicionar_questao') }}" class="btn btn-primary">
+                <i class="fas fa-plus-circle me-1"></i> Adicionar questão
+            </a>
+            <a href="{{ url_for('gerenciar') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Voltar
+            </a>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Carregar tópicos atuais se disciplina estiver selecionada
+        const disciplinaId = $('#disciplina_id').val();
+        const topicoIdAtual = '{{ request.args.get("topico_id", "") }}';
+        
+        if (disciplinaId) {
+            carregarTopicos(disciplinaId, topicoIdAtual);
+        }
+        
+        // Quando a disciplina for alterada, carregar os tópicos correspondentes
+        $('#disciplina_id').change(function() {
+            const disciplinaId = $(this).val();
+            
+            if (disciplinaId) {
+                carregarTopicos(disciplinaId);
+            } else {
+                $('#topico_id').html('<option value="">Todos os tópicos</option>');
+                $('#topico_id').prop('disabled', true);
+            }
+        });
+        
+        // Botão para alternar status (ativar/desativar questão)
+        $('.toggle-status').click(function() {
+            const questaoId = $(this).data('questao-id');
+            const statusAtual = $(this).data('status');
+            const novoStatus = !statusAtual;
+            const acao = statusAtual ? 'desativar' : 'ativar';
+            
+            if (confirm(`Deseja realmente ${acao} esta questão?`)) {
+                $.ajax({
+                    url: "{{ url_for('alternar_status_questao') }}",
+                    type: "POST",
+                    data: {
+                        questao_id: questaoId,
+                        status: novoStatus
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // Recarregar a página para atualizar a tabela
+                            location.reload();
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        showAlert(`Erro ao ${acao} questão: ${error}`, 'danger');
+                    }
+                });
+            }
+        });
+        
+        // Função para carregar tópicos
+        function carregarTopicos(disciplinaId, topicoIdSelecionado = '') {
+            $('#topico_id').prop('disabled', true);
+            $('#topico_id').html('<option value="">Carregando tópicos...</option>');
+            
+            $.getJSON("{{ url_for('get_topicos', disciplina_id=0) }}".replace('0', disciplinaId), function(data) {
+                let options = '<option value="">Todos os tópicos</option>';
+                
+                if (data.length > 0) {
+                    $.each(data, function(index, topico) {
+                        const selected = topicoIdSelecionado == topico.id ? 'selected' : '';
+                        options += '<option value="' + topico.id + '" ' + selected + '>' + topico.nome + '</option>';
+                    });
+                }
+                
+                $('#topico_id').html(options);
+                $('#topico_id').prop('disabled', false);
+            })
+            .fail(function() {
+                $('#topico_id').html('<option value="">Erro ao carregar tópicos</option>');
+            });
+        }
+    });
+</script>
+{% endblock %}

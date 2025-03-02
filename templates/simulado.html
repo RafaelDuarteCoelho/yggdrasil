@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block title %}Yggdrasil - Simulado{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="col-6 col-md-3">
+            <a href="{{ url_for('relatorio_simulado') }}" class="text-decoration-none">
+                <div class="card h-100 border-0 bg-success text-white text-center">
+                    <div class="card-body d-flex flex-column justify-content-center">
+                        <i class="fas fa-clipboard-list fa-3x mb-3"></i>
+                        <h5 class="card-title mb-0">Relatório do Simulado</h5>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="custom-card p-4 animate-slide-up">
+            <h2 class="fw-bold text-primary mb-4">Configurar Simulado</h2>
+            
+            <form action="{{ url_for('simulado') }}" method="post">
+                <p class="text-muted mb-4">Selecione a quantidade de questões de cada disciplina para o seu simulado.</p>
+                
+                {% if disciplinas %}
+                    {% for disciplina in disciplinas %}
+                        <div class="card mb-3 border-0 shadow-sm">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-md-6">
+                                        <h5 class="fw-bold mb-0">{{ disciplina.nome }}</h5>
+                                        <small class="text-muted">{{ disciplina.questoes|length }} questões disponíveis</small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-primary text-white">Questões</span>
+                                            <input type="number" class="form-control" 
+                                                name="disciplina_{{ disciplina.id }}" 
+                                                min="0" 
+                                                max="{{ disciplina.questoes|length }}" 
+                                                value="0">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-play-circle me-2"></i> Iniciar Simulado
+                        </button>
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i> Voltar
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        <h4 class="alert-heading">Nenhuma disciplina cadastrada!</h4>
+                        <p>Para criar um simulado, você precisa adicionar disciplinas e questões.</p>
+                        <hr>
+                        <div class="d-grid gap-2 d-md-flex">
+                            <a href="{{ url_for('adicionar_disciplina') }}" class="btn btn-primary">
+                                <i class="fas fa-plus-circle me-1"></i> Adicionar disciplina
+                            </a>
+                            <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i> Voltar
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Validação para o formulário
+        $('form').submit(function(e) {
+            let totalQuestoes = 0;
+            
+            // Somar total de questões selecionadas
+            $('input[type="number"]').each(function() {
+                totalQuestoes += parseInt($(this).val() || 0);
+            });
+            
+            if (totalQuestoes === 0) {
+                e.preventDefault();
+                showAlert('Selecione pelo menos uma questão para o simulado!', 'warning');
+                return false;
+            }
+            
+            return true;
+        });
+        
+        // Atualizar total de questões ao digitar
+        $('input[type="number"]').on('input', function() {
+            let totalQuestoes = 0;
+            
+            $('input[type="number"]').each(function() {
+                totalQuestoes += parseInt($(this).val() || 0);
+            });
+            
+            $('#total-questoes').text(totalQuestoes);
+        });
+    });
+</script>
+{% endblock %}

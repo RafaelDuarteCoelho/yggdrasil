@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+
+{% block title %}Yggdrasil - Relatório de Simulado{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="custom-card p-4 animate-slide-up">
+            <h2 class="fw-bold text-primary mb-4">Relatório do Simulado</h2>
+            
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-3"><i class="fas fa-chart-pie me-2"></i> Desempenho Geral</h5>
+                    
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="progress mb-2" style="height: 25px;">
+                                <div class="progress-bar bg-success" role="progressbar" 
+                                    style="width: {{ (total_acertos / total_questoes * 100)|round }}%;" 
+                                    aria-valuenow="{{ (total_acertos / total_questoes * 100)|round }}" 
+                                    aria-valuemin="0" aria-valuemax="100">
+                                    {{ (total_acertos / total_questoes * 100)|round|int }}% corretas
+                                </div>
+                                <div class="progress-bar bg-danger" role="progressbar" 
+                                    style="width: {{ (total_erros / total_questoes * 100)|round }}%;" 
+                                    aria-valuenow="{{ (total_erros / total_questoes * 100)|round }}" 
+                                    aria-valuemin="0" aria-valuemax="100">
+                                    {{ (total_erros / total_questoes * 100)|round|int }}% incorretas
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="h3">
+                                <span class="text-success">{{ total_acertos }}</span> / 
+                                <span class="text-muted">{{ total_questoes }}</span>
+                                <small class="text-muted d-block">Acertos de um total de {{ total_questoes }} questões</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Desempenho por disciplina -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-3"><i class="fas fa-book me-2"></i> Desempenho por Disciplina</h5>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Disciplina</th>
+                                    <th>Acertos</th>
+                                    <th>Total</th>
+                                    <th>Percentual</th>
+                                    <th>Desempenho</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for disciplina_id, stats in disciplinas_stats.items() %}
+                                    {% set percentual = (stats.acertos / stats.total * 100)|round|int %}
+                                    <tr>
+                                        <td>{{ stats.nome }}</td>
+                                        <td>{{ stats.acertos }}</td>
+                                        <td>{{ stats.total }}</td>
+                                        <td>{{ percentual }}%</td>
+                                        <td>
+                                            <div class="progress" style="height: 15px;">
+                                                <div class="progress-bar {{ 'bg-success' if percentual >= 70 else 'bg-warning' if percentual >= 50 else 'bg-danger' }}" 
+                                                    role="progressbar" style="width: {{ percentual }}%;" 
+                                                    aria-valuenow="{{ percentual }}" aria-valuemin="0" 
+                                                    aria-valuemax="100">
+                                                    {{ percentual }}%
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Níveis de confiança -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <h5 class="card-title text-success mb-3"><i class="fas fa-check-circle me-2"></i> Acertos por Nível de Confiança</h5>
+                            
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Certeza</span>
+                                    <span>{{ confianca_stats.acertos.certeza }} de {{ confianca_stats.total.certeza }}</span>
+                                </div>
+                                <div class="progress" style="height: 15px;">
+                                    <div class="progress-bar bg-success" role="progressbar" 
+                                        style="width: {{ (confianca_stats.acertos.certeza / confianca_stats.total.certeza * 100)|round if confianca_stats.total.certeza > 0 else 0 }}%;" 
+                                        aria-valuenow="{{ (confianca_stats.acertos.certeza / confianca_stats.total.certeza * 100)|round if confianca_stats.total.certeza > 0 else 0 }}" 
+                                        aria-valuemin="0" aria-valuemax="100">
+                                        {{ (confianca_stats.acertos.certeza / confianca_stats.total.certeza * 100)|round|int if confianca_stats.total.certeza > 0 else 0 }}%
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Confiante</span>
+                                    <span>{{ confianca_stats.acertos.confiante }} de {{ confianca_stats.total.confiante }}</span>
+                                </div>
+                                <div class="progress" style="height: 15px;">
+                                    <div class="progress-bar bg-success" role="progressbar" 
+                                        style="width: {{ (confianca_stats.acertos.confiante / confianca_stats.total.confiante * 100)|round if confianca_stats.total.confiante > 0 else 0 }}%;" 
+                                        aria-valuenow="{{ (confianca_stats.acertos.confiante / confianca_stats.total.confiante * 100)|round if confianca_stats.total.confiante > 0 else 0 }}" 
+                                        aria-valuemin="0" aria-valuemax="100">
+                                        {{ (confianca_stats.acertos.confiante / confianca_stats.total.confiante * 100)|round|int if confianca_stats.total.confiante > 0 else 0 }}%
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Dúvida</span>
+                                    <span>{{ confianca_stats.acertos.duvida }} de {{ confianca_stats.total.duvida }}</span>
+                                </div>
+                                <div class="progress" style="height: 15px;">
+                                    <div class="progress-bar bg-success" role="progressbar" 
+                                        style="width: {{ (confianca_stats.acertos.duvida / confianca_stats.total.duvida * 100)|round if confianca_stats.total.duvida > 0 else 0 }}%;" 
+                                        aria-valuenow="{{ (confianca_stats.acertos.duvida / confianca_stats.total.duvida * 100)|round if confianca_stats.total.duvida > 0 else 0 }}" 
+                                        aria-valuemin="0" aria-valuemax="100">
+                                        {{ (confianca_stats.acertos.duvida / confianca_stats.total.duvida * 100)|round|int if confianca_stats.total.duvida > 0 else 0 }}%
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <h5 class="card-title text-danger mb-3"><i class="fas fa-times-circle me-2"></i> Erros por Nível de Confiança</h5>
+                            
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Certeza</span>
+                                    <span>{{ confianca_stats.erros.certeza }} de {{ confianca_stats.total.certeza }}</span>
+                                </div>
+                                <div class="progress" style="height: 15px;">
+                                    <div class="progress-bar bg-danger" role="progressbar" 
+                                        style="width: {{ (confianca_stats.erros.certeza / confianca_stats.total.certeza * 100)|round if confianca_stats.total.certeza > 0 else 0 }}%;" 
+                                        aria-valuenow="{{ (confianca_stats.erros.certeza / confianca_stats.total.certeza * 100)|round if confianca_stats.total.certeza > 0 else 0 }}" 
+                                        aria-valuemin="0" aria-valuemax="100">
+                                        {{ (confianca_stats.erros.certeza / confianca_stats.total.certeza * 100)|round|int if confianca_stats.total.certeza > 0 else 0 }}%
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Confiante</span>
+                                    <span>{{ confianca_stats.erros.confiante }} de {{ confianca_stats.total.confiante }}</span>
+                                </div>
+                                <div class="progress" style="height: 15px;">
+                                    <div class="progress-bar bg-danger" role="progressbar" 
+                                        style="width: {{ (confianca_stats.erros.confiante / confianca_stats.total.confiante * 100)|round if confianca_stats.total.confiante > 0 else 0 }}%;" 
+                                        aria-valuenow="{{ (confianca_stats.erros.confiante / confianca_stats.total.confiante * 100)|round if confianca_stats.total.confiante > 0 else 0 }}" 
+                                        aria-valuemin="0" aria-valuemax="100">
+                                        {{ (confianca_stats.erros.confiante / confianca_stats.total.confiante * 100)|round|int if confianca_stats.total.confiante > 0 else 0 }}%
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Dúvida</span>
+                                    <span>{{ confianca_stats.erros.duvida }} de {{ confianca_stats.total.duvida }}</span>
+                                </div>
+                                <div class="progress" style="height: 15px;">
+                                    <div class="progress-bar bg-danger" role="progressbar" 
+                                        style="width: {{ (confianca_stats.erros.duvida / confianca_stats.total.duvida * 100)|round if confianca_stats.total.duvida > 0 else 0 }}%;" 
+                                        aria-valuenow="{{ (confianca_stats.erros.duvida / confianca_stats.total.duvida * 100)|round if confianca_stats.total.duvida > 0 else 0 }}" 
+                                        aria-valuemin="0" aria-valuemax="100">
+                                        {{ (confianca_stats.erros.duvida / confianca_stats.total.duvida * 100)|round|int if confianca_stats.total.duvida > 0 else 0 }}%
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-grid gap-2">
+                <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-home me-2"></i> Voltar para o Início
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

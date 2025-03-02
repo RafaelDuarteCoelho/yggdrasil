@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}Yggdrasil - Assistente de Estudos{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mb-4">
+    <div class="col-md-8 text-center">
+        <h1 class="display-5 fw-bold text-primary">Bem-vindo ao Yggdrasil</h1>
+        <p class="lead mb-4">Seu assistente de estudos para concursos baseado em revisão espaçada</p>
+    </div>
+</div>
+
+<!-- Cards de ação rápida -->
+<div class="row g-4 mb-5 animate-slide-up">
+    <div class="col-6 col-md-3">
+        <a href="{{ url_for('revisao') }}" class="text-decoration-none">
+            <div class="card h-100 border-0 bg-primary text-white text-center">
+                <div class="card-body d-flex flex-column justify-content-center">
+                    <i class="fas fa-sync-alt fa-3x mb-3"></i>
+                    <h5 class="card-title mb-0">Revisão</h5>
+                </div>
+            </div>
+        </a>
+    </div>
+    
+    <div class="col-6 col-md-3">
+        <a href="{{ url_for('simulado') }}" class="text-decoration-none">
+            <div class="card h-100 border-0 bg-success text-white text-center">
+                <div class="card-body d-flex flex-column justify-content-center">
+                    <i class="fas fa-clipboard-list fa-3x mb-3"></i>
+                    <h5 class="card-title mb-0">Simulado</h5>
+                </div>
+            </div>
+        </a>
+    </div>
+    
+    <div class="col-6 col-md-3">
+        <a href="{{ url_for('questoes_distantes') }}" class="text-decoration-none">
+            <div class="card h-100 border-0 bg-warning text-dark text-center">
+                <div class="card-body d-flex flex-column justify-content-center">
+                    <i class="fas fa-calendar-alt fa-3x mb-3"></i>
+                    <h5 class="card-title mb-0">Distantes</h5>
+                </div>
+            </div>
+        </a>
+    </div>
+    
+    <div class="col-6 col-md-3">
+        <a href="{{ url_for('questoes_dificeis') }}" class="text-decoration-none">
+            <div class="card h-100 border-0 bg-danger text-white text-center">
+                <div class="card-body d-flex flex-column justify-content-center">
+                    <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+                    <h5 class="card-title mb-0">Difíceis</h5>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- Disciplinas -->
+<h2 class="fw-bold text-primary mb-4">Disciplinas</h2>
+
+{% if disciplinas %}
+    <div class="row g-4">
+        {% for disciplina in disciplinas %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h3 class="card-title fw-bold">{{ disciplina.nome }}</h3>
+                            <span class="badge bg-primary rounded-pill">{{ disciplina.estatisticas.total_questoes }} questões</span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <p class="text-muted mb-1">Percentual de acertos</p>
+                            <div class="progress mb-1">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: {{ disciplina.estatisticas.acertos_percentual }}%;" 
+                                    aria-valuenow="{{ disciplina.estatisticas.acertos_percentual }}" aria-valuemin="0" aria-valuemax="100">
+                                    {{ disciplina.estatisticas.acertos_percentual }}%
+                                </div>
+                            </div>
+                            <small class="text-muted">{{ disciplina.estatisticas.questoes_acertadas }} de {{ disciplina.estatisticas.total_questoes }} questões acertadas</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <p class="text-muted mb-1">Percentual de erros</p>
+                            <div class="progress mb-1">
+                                <div class="progress-bar bg-danger" role="progressbar" 
+                                    style="width: {{ disciplina.estatisticas.erros_percentual }}%;" 
+                                    aria-valuenow="{{ disciplina.estatisticas.erros_percentual }}" 
+                                    aria-valuemin="0" aria-valuemax="100">
+                                    {{ disciplina.estatisticas.erros_percentual|round|int }}%
+                                </div>
+                            </div>
+                            <small class="text-muted">{{ disciplina.estatisticas.questoes_erradas }} de {{ disciplina.estatisticas.total_questoes }} questões erradas pelo menos uma vez</small>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('ver_disciplina', disciplina_id=disciplina.id) }}" class="btn btn-outline-primary">
+                                Ver detalhes
+                            </a>
+                            <a href="{{ url_for('escolher_ordem', modo='disciplina', id_ref=disciplina.id) }}" class="btn btn-primary">
+                                Praticar agora
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        <h4 class="alert-heading">Nenhuma disciplina cadastrada!</h4>
+        <p>Para começar a usar o Yggdrasil, adicione suas primeiras disciplinas e questões.</p>
+        <hr>
+        <div class="d-grid gap-2 d-md-flex">
+            <a href="{{ url_for('adicionar_disciplina') }}" class="btn btn-primary">
+                <i class="fas fa-plus-circle me-1"></i> Adicionar disciplina
+            </a>
+            <a href="{{ url_for('adicionar_questao') }}" class="btn btn-success">
+                <i class="fas fa-plus-circle me-1"></i> Adicionar questão
+            </a>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

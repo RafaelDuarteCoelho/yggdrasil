@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+
+{% block title %}Yggdrasil - Questão{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="position-relative mb-2">
+            <a href="{{ url_for('index') }}" class="btn-fechar">
+                <i class="fas fa-times"></i>
+            </a>
+            <button class="btn-denunciar" id="btn-denunciar" data-questao-id="{{ questao.id }}">
+                <i class="fas fa-flag"></i>
+            </button>
+            <div class="badge bg-primary position-absolute top-0 start-50 translate-middle-x py-2 px-3 rounded-pill">
+                {{ progresso }}
+            </div>
+        </div>
+        
+        <div class="custom-card p-4 questao-card">
+            <!-- Cabeçalho com disciplina e tópico -->
+            <div class="d-flex justify-content-between mb-3">
+                <span class="badge bg-primary rounded-pill">{{ questao.disciplina.nome }}</span>
+                <span class="badge bg-secondary rounded-pill">{{ questao.topico.nome }}</span>
+            </div>
+            
+            <!-- Enunciado da questão -->
+            <div class="flex-grow-1 mb-4">
+                <div class="card border-0 bg-light mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3 text-primary fw-bold">Enunciado</h5>
+                        <p class="card-text">{{ questao.enunciado }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Área de feedback (inicialmente oculta) -->
+            <div id="feedback-area" class="mb-4" style="display: none;">
+                <div id="feedback-container" class="p-4 mb-3">
+                    <h5 class="fw-bold" id="feedback-titulo"></h5>
+                    <p id="feedback-mensagem"></p>
+                </div>
+                
+                <div class="card border-0 bg-light">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3 text-primary fw-bold">Justificativa</h5>
+                        <p class="card-text" id="justificativa"></p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Botões de resposta (visíveis antes de responder) -->
+            <div id="botoes-resposta" class="bottom-buttons gap-4 sm:gap-10 flex md:gap-10 flex">
+                <!--<h5 class="text-center mb-3">Responda a questão e selecione seu nível de confiança</h5>-->
+                
+                <!-- CERTO com níveis de confiança -->
+                <div class="d-flex flex-column align-items-center mb-3">
+                    <h6 class="text-center mb-2 text-success fw-bold">CERTO</h6>
+                    <div class="d-flex flex-column flex-lg-row gap-2">
+                        <button class="btn btn-success" id="btn-certo-certeza" data-questao-id="{{ questao.id }}" data-resposta="true" data-confianca="certeza">
+                            <i class="fas fa-check-double me-1"></i> Certeza
+                        </button>
+                        <button class="btn btn-success" id="btn-certo-confiante" data-questao-id="{{ questao.id }}" data-resposta="true" data-confianca="confiante">
+                            <i class="fas fa-check me-1"></i> Confiante
+                        </button>
+                        <button class="btn btn-success" id="btn-certo-duvida" data-questao-id="{{ questao.id }}" data-resposta="true" data-confianca="duvida">
+                            <i class="fas fa-question-circle me-1"></i> Dúvida
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- ERRADO com níveis de confiança -->
+                <div class="d-flex flex-column align-items-center">
+                    <h6 class="text-center mb-2 text-danger fw-bold">ERRADO</h6>
+                    <div class="d-flex flex-column flex-lg-row gap-2">
+                        <button class="btn btn-danger" id="btn-errado-certeza" data-questao-id="{{ questao.id }}" data-resposta="false" data-confianca="certeza">
+                            <i class="fas fa-times-circle me-1"></i> Certeza
+                        </button>
+                        <button class="btn btn-danger" id="btn-errado-confiante" data-questao-id="{{ questao.id }}" data-resposta="false" data-confianca="confiante">
+                            <i class="fas fa-times me-1"></i> Confiante
+                        </button>
+                        <button class="btn btn-danger" id="btn-errado-duvida" data-questao-id="{{ questao.id }}" data-resposta="false" data-confianca="duvida">
+                            <i class="fas fa-question-circle me-1"></i> Dúvida
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+
+            
+            <!-- Botão de próxima questão (visível após responder) -->
+            <div id="botao-proxima" class="bottom-buttons" style="display: none;">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary btn-lg" id="btn-proxima">
+                        Próxima Questão <i class="fas fa-arrow-right ms-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Botões de resposta (seleciona todos os botões com data-questao-id)
+        $('[data-questao-id]').click(function() {
+            // Ignora o botão de denunciar
+            if ($(this).attr('id') === 'btn-denunciar') {
+                return;
+            }
+            
+            const questaoId = $(this).data('questao-id');
+            const resposta = $(this).data('resposta');
+            const confianca = $(this).data('confianca');
+            
+            // Desabilitar botões para evitar duplo clique
+            $('[data-questao-id]').not('#btn-denunciar').prop('disabled', true);
+            
+            // Enviar resposta para o servidor
+            $.ajax({
+                url: "{{ url_for('responder') }}",
+                type: "POST",
+                data: {
+                    questao_id: questaoId,
+                    resposta: resposta,
+                    confianca: confianca
+                },
+                success: function(response) {
+                    // Mostrar feedback
+                    if (response.acertou) {
+                        $('#feedback-titulo').text('Resposta Correta! 👍');
+                        $('#feedback-container').removeClass('feedback-erro').addClass('feedback-acerto');
+                    } else {
+                        $('#feedback-titulo').text('Resposta Incorreta! ❌');
+                        $('#feedback-container').removeClass('feedback-acerto').addClass('feedback-erro');
+                    }
+                    
+                    // Preencher justificativa
+                    $('#justificativa').text(response.justificativa);
+                    
+                    // Ocultar botões de resposta e mostrar área de feedback
+                    $('#botoes-resposta').hide();
+                    $('#feedback-area').show();
+                    
+                    // Mostrar botão de próxima questão (se houver mais questões)
+                    if (response.proxima_questao) {
+                        $('#botao-proxima').show();
+                    } else {
+                        $('#botao-proxima').html(`
+                            <div class="d-grid gap-2">
+                                <a href="{{ url_for('index') }}" class="btn btn-success btn-lg">
+                                    Finalizar <i class="fas fa-check-circle ms-2"></i>
+                                </a>
+                            </div>
+                        `);
+                        $('#botao-proxima').show();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    showAlert('Erro ao enviar resposta: ' + error, 'danger');
+                    // Reabilitar botões em caso de erro
+                    $('[data-questao-id]').not('#btn-denunciar').prop('disabled', false);
+                }
+            });
+        });
+        
+        // Botão de próxima questão
+        $('#btn-proxima').click(function() {
+            window.location.href = "{{ url_for('mostrar_questao', modo=modo) }}";
+        });
+        
+        // Botão de denunciar
+        $('#btn-denunciar').click(function() {
+            if (confirm('Deseja realmente denunciar esta questão? Ela será desativada e não aparecerá mais nas revisões.')) {
+                const questaoId = $(this).data('questao-id');
+                
+                $.ajax({
+                    url: "{{ url_for('denunciar') }}",
+                    type: "POST",
+                    data: {
+                        questao_id: questaoId
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            showAlert('Questão denunciada com sucesso!', 'warning');
+                            
+                            // Redirecionar para a próxima questão ou para o início
+                            if (response.proxima_questao) {
+                                window.location.href = "{{ url_for('mostrar_questao', modo=modo) }}";
+                            } else {
+                                window.location.href = "{{ url_for('index') }}";
+                            }
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        showAlert('Erro ao denunciar questão: ' + error, 'danger');
+                    }
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

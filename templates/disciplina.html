@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}Yggdrasil - {{ disciplina.nome }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="fw-bold text-primary mb-0">{{ disciplina.nome }}</h1>
+        <p class="text-muted">{{ disciplina.estatisticas.total_questoes }} questões cadastradas</p>
+    </div>
+    <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i> Voltar
+    </a>
+</div>
+
+<!-- Card de estatísticas -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <h5 class="card-title fw-bold mb-3"><i class="fas fa-chart-bar me-2"></i> Estatísticas Gerais</h5>
+        
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <p class="text-muted mb-1">Percentual de acertos</p>
+                    <div class="progress mb-1">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ disciplina.estatisticas.acertos_percentual }}%;" 
+                            aria-valuenow="{{ disciplina.estatisticas.acertos_percentual }}" aria-valuemin="0" aria-valuemax="100">
+                            {{ disciplina.estatisticas.acertos_percentual }}%
+                        </div>
+                    </div>
+                    <small class="text-muted">{{ disciplina.estatisticas.questoes_acertadas }} de {{ disciplina.estatisticas.total_questoes }} questões acertadas</small>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <p class="text-muted mb-1">Erros por questão</p>
+                    <div class="d-flex align-items-center">
+                        <div class="progress flex-grow-1 me-2">
+                            <div class="progress-bar bg-danger" role="progressbar" 
+                                style="width: {{ min(100, disciplina.estatisticas.erros_por_questao * 20) }}%;" 
+                                aria-valuenow="{{ disciplina.estatisticas.erros_por_questao }}" aria-valuemin="0" aria-valuemax="5">
+                            </div>
+                        </div>
+                        <span class="fw-bold">{{ disciplina.estatisticas.erros_por_questao }}</span>
+                    </div>
+                    <small class="text-muted">Total de {{ disciplina.estatisticas.total_erros }} erros</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="d-grid gap-2 mt-3">
+            <a href="{{ url_for('escolher_ordem', modo='disciplina', id_ref=disciplina.id) }}" class="btn btn-primary">
+                <i class="fas fa-play-circle me-2"></i> Praticar esta disciplina
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Tópicos -->
+<h2 class="fw-bold text-primary mb-3">Tópicos</h2>
+
+{% if topicos %}
+    <div class="row g-4">
+        {% for topico in topicos %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h3 class="card-title h5 fw-bold">{{ topico.nome }}</h3>
+                            <span class="badge bg-primary rounded-pill">{{ topico.questoes|length }} questões</span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <p class="text-muted mb-1">Percentual de acertos</p>
+                            <div class="progress mb-1">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: {{ topico.estatisticas.acertos_percentual }}%;" 
+                                    aria-valuenow="{{ topico.estatisticas.acertos_percentual }}" aria-valuemin="0" aria-valuemax="100">
+                                    {{ topico.estatisticas.acertos_percentual }}%
+                                </div>
+                            </div>
+                            <small class="text-muted">{{ topico.estatisticas.questoes_acertadas }} de {{ topico.estatisticas.total_questoes }} questões acertadas</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <p class="text-muted mb-1">Erros por questão</p>
+                            <div class="d-flex align-items-center">
+                                <div class="progress flex-grow-1 me-2">
+                                    <div class="progress-bar bg-danger" role="progressbar" 
+                                        style="width: {{ min(100, topico.estatisticas.erros_por_questao * 20) }}%;" 
+                                        aria-valuenow="{{ topico.estatisticas.erros_por_questao }}" aria-valuemin="0" aria-valuemax="5">
+                                    </div>
+                                </div>
+                                <span class="fw-bold">{{ topico.estatisticas.erros_por_questao }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <a href="{{ url_for('escolher_ordem', modo='topico', id_ref=topico.id) }}" class="btn btn-outline-primary">
+                                <i class="fas fa-play-circle me-2"></i> Praticar este tópico
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        <h4 class="alert-heading">Nenhum tópico cadastrado!</h4>
+        <p>Esta disciplina ainda não possui tópicos. Adicione tópicos para melhor organizar suas questões.</p>
+        <hr>
+        <div class="d-grid gap-2 d-md-flex">
+            <a href="{{ url_for('adicionar_topico') }}" class="btn btn-primary">
+                <i class="fas fa-plus-circle me-1"></i> Adicionar tópico
+            </a>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

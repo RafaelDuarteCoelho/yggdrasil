@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+
+{% block title %}Yggdrasil - Editar Questão{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="custom-card p-4 animate-slide-up">
+            <h2 class="fw-bold text-primary mb-4">Editar Questão #{{ questao.id }}</h2>
+            
+            <form action="{{ url_for('editar_questao', questao_id=questao.id) }}" method="post">
+                <!-- Disciplina e Tópico -->
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <label for="disciplina_id" class="form-label fw-bold">Disciplina *</label>
+                        <select class="form-select" id="disciplina_id" name="disciplina_id" required>
+                            <option value="" disabled>Selecione a disciplina</option>
+                            {% for disciplina in disciplinas %}
+                                <option value="{{ disciplina.id }}" {% if questao.disciplina_id == disciplina.id %}selected{% endif %}>
+                                    {{ disciplina.nome }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="topico_id" class="form-label fw-bold">Tópico *</label>
+                        <select class="form-select" id="topico_id" name="topico_id" required>
+                            <option value="" disabled>Selecione o tópico</option>
+                            {% for topico in topicos %}
+                                <option value="{{ topico.id }}" {% if questao.topico_id == topico.id %}selected{% endif %}>
+                                    {{ topico.nome }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Enunciado -->
+                <div class="mb-4">
+                    <label for="enunciado" class="form-label fw-bold">Enunciado *</label>
+                    <textarea class="form-control" id="enunciado" name="enunciado" rows="5" required>{{ questao.enunciado }}</textarea>
+                </div>
+                
+                <!-- Gabarito -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold d-block">Gabarito *</label>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="gabarito" id="gabarito_certo" value="true" required
+                            {% if questao.gabarito %}checked{% endif %}>
+                        <label class="form-check-label" for="gabarito_certo">Certo</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="gabarito" id="gabarito_errado" value="false"
+                            {% if not questao.gabarito %}checked{% endif %}>
+                        <label class="form-check-label" for="gabarito_errado">Errado</label>
+                    </div>
+                </div>
+                
+                <!-- Justificativa -->
+                <div class="mb-4">
+                    <label for="justificativa" class="form-label fw-bold">Justificativa *</label>
+                    <textarea class="form-control" id="justificativa" name="justificativa" rows="5" required>{{ questao.justificativa }}</textarea>
+                </div>
+                
+                <!-- Status -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold d-block">Status</label>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="status" name="status" value="true"
+                            {% if questao.status %}checked{% endif %}>
+                        <label class="form-check-label" for="status">
+                            {% if questao.status %}
+                                <span class="text-success">Ativa</span>
+                            {% else %}
+                                <span class="text-danger">Desativada</span>
+                            {% endif %}
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Estatísticas -->
+                <div class="card mb-4 border-0 bg-light">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold mb-3">Estatísticas</h5>
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h6 class="text-muted mb-1">Acertos</h6>
+                                    <span class="badge bg-success fs-5">{{ questao.numero_acertos }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h6 class="text-muted mb-1">Erros</h6>
+                                    <span class="badge bg-danger fs-5">{{ questao.numero_erros }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h6 class="text-muted mb-1">Última data</h6>
+                                    <span class="badge bg-info fs-5">{{ questao.ultima_data.strftime('%d/%m/%Y') }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="text-center">
+                                    <h6 class="text-muted mb-1">Próxima data</h6>
+                                    <span class="badge bg-warning text-dark fs-5">{{ questao.proxima_data.strftime('%d/%m/%Y') }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-save me-2"></i> Salvar Alterações
+                    </button>
+                    <a href="{{ url_for('listar_questoes') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i> Voltar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Atualizar label do status ao mudar o switch
+        $('#status').change(function() {
+            if ($(this).is(':checked')) {
+                $('label[for="status"]').html('<span class="text-success">Ativa</span>');
+            } else {
+                $('label[for="status"]').html('<span class="text-danger">Desativada</span>');
+            }
+        });
+        
+        // Quando a disciplina for alterada, carregar os tópicos correspondentes
+        $('#disciplina_id').change(function() {
+            const disciplinaId = $(this).val();
+            
+            if (disciplinaId) {
+                // Habilitar o campo de tópico
+                $('#topico_id').prop('disabled', true);
+                $('#topico_id').html('<option value="" selected disabled>Carregando tópicos...</option>');
+                
+                // Carregar tópicos via AJAX
+                $.getJSON("{{ url_for('get_topicos', disciplina_id=0) }}".replace('0', disciplinaId), function(data) {
+                    let options = '<option value="" selected disabled>Selecione o tópico</option>';
+                    
+                    if (data.length > 0) {
+                        $.each(data, function(index, topico) {
+                            options += '<option value="' + topico.id + '">' + topico.nome + '</option>';
+                        });
+                    } else {
+                        options = '<option value="" selected disabled>Nenhum tópico encontrado</option>';
+                    }
+                    
+                    $('#topico_id').html(options);
+                    $('#topico_id').prop('disabled', false);
+                })
+                .fail(function() {
+                    $('#topico_id').html('<option value="" selected disabled>Erro ao carregar tópicos</option>');
+                });
+            } else {
+                $('#topico_id').html('<option value="" selected disabled>Selecione a disciplina primeiro</option>');
+                $('#topico_id').prop('disabled', true);
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,70 @@
+# Bytecode do Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Diretórios do ambiente virtual
+venv/
+.env/
+
+# Configurações do ambiente
+.env
+*.env
+
+# Dependências
+*.egg-info/
+*.dist-info/
+
+# Arquivos de banco de dados locais
+*.sqlite3
+instance/
+
+# Logs e caches
+logs/
+*.log
+*.pid
+*.seed
+*.cover
+
+# Arquivos temporários e compilados
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# IDEs e editores
+.vscode/
+.idea/
+*.iml
+
+# Arquivos gerados pelo Flask
+instance/
+migrations/
+
+# Arquivos estáticos e uploads
+staticfiles/
+media/
+uploads/
+
+# Docker
+*.dockerfile
+**/docker-compose.yml
+
+# Ignorar testes e coberturas geradas automaticamente
+.coverage
+*.cover
+.nox/
+htmlcov/
+
+# Outras ferramentas
+pytest_cache/
+nosetests.xml
+coverage.xml
+*.cover
+.tox/
+
+dist/
+build/
+*.tar.gz
+*.zip
