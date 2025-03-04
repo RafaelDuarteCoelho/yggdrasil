@@ -140,7 +140,14 @@ def index():
     for disciplina in disciplinas:
         disciplina.estatisticas = disciplina.calcular_estatisticas()
     
-    return render_template('index.html', disciplinas=disciplinas)
+    # Contar questões acumuladas para revisão (hoje ou atrasadas)
+    hoje = datetime.now().date()
+    questoes_para_revisao = Questao.query.filter(
+        Questao.proxima_data <= hoje,
+        Questao.status == True
+    ).count()
+    
+    return render_template('index.html', disciplinas=disciplinas, questoes_para_revisao=questoes_para_revisao)
 
 @app.route('/disciplina/<int:disciplina_id>')
 def ver_disciplina(disciplina_id):
@@ -215,6 +222,13 @@ def revisao():
                 questoes_reorganizadas.append(questoes_por_disciplina[disciplina_id].pop(0))
                 ainda_tem_questoes = True
     
+    # Limitar o número de questões para evitar cookies grandes demais
+    # (A sessão do Flask tem limite de tamanho)
+    MAX_QUESTOES_POR_SESSAO = 300
+    if len(questoes_reorganizadas) > MAX_QUESTOES_POR_SESSAO:
+        flash(f'Há {len(questoes_reorganizadas)} questões para revisar hoje. Mostrando as {MAX_QUESTOES_POR_SESSAO} primeiras.', 'info')
+        questoes_reorganizadas = questoes_reorganizadas[:MAX_QUESTOES_POR_SESSAO]
+    
     # Guardar IDs das questões na sessão para controle
     session['questoes_revisao'] = [q.id for q in questoes_reorganizadas]
     session['indice_atual'] = 0
@@ -270,6 +284,12 @@ def aleatorio(modo, id_ref, ordem='aleatoria'):
     else:  # aleatória
         random.shuffle(questoes)
     
+    # Limitar o número de questões para evitar cookies grandes demais
+    MAX_QUESTOES_POR_SESSAO = 300
+    if len(questoes) > MAX_QUESTOES_POR_SESSAO:
+        flash(f'Há {len(questoes)} questões nesta categoria. Mostrando as {MAX_QUESTOES_POR_SESSAO} primeiras.', 'info')
+        questoes = questoes[:MAX_QUESTOES_POR_SESSAO]
+    
     # Guardar IDs das questões na sessão
     session['questoes_revisao'] = [q.id for q in questoes]
     session['indice_atual'] = 0
@@ -280,7 +300,7 @@ def aleatorio(modo, id_ref, ordem='aleatoria'):
 
 
 # Adicionar rota para a modalidade "Difíceis"
-@app.route('/dificeis')
+@app.route('/questoes_dificeis')
 def questoes_dificeis():
     # Filtrar questões com mais erros que acertos
     questoes = Questao.query.filter(
@@ -292,24 +312,38 @@ def questoes_dificeis():
         flash('Não há questões difíceis disponíveis!', 'info')
         return redirect(url_for('index'))
     
+    # Limitar o número de questões para evitar cookies grandes demais
+    MAX_QUESTOES_POR_SESSAO = 300
+    if len(questoes) > MAX_QUESTOES_POR_SESSAO:
+        flash(f'Há {len(questoes)} questões difíceis. Mostrando as {MAX_QUESTOES_POR_SESSAO} com mais erros.', 'info')
+        questoes = questoes[:MAX_QUESTOES_POR_SESSAO]
+    
     # Guardar IDs das questões na sessão
     session['questoes_revisao'] = [q.id for q in questoes]
     session['indice_atual'] = 0
+    session['modo_estudo'] = 'dificeis'
     
     return redirect(url_for('mostrar_questao', modo='dificeis'))
 
 @app.route('/distantes')
 def questoes_distantes():
     # Ordenar questões ativas por data de última aparição (mais antigas primeiro)
-    questoes = Questao.query.filter_by(status=True).order_by(Questao.ultima_data.asc()).limit(50).all()
+    questoes = Questao.query.filter_by(status=True).order_by(Questao.ultima_data.asc()).all()
     
     if not questoes:
         flash('Não há questões disponíveis!', 'info')
         return redirect(url_for('index'))
     
+    # Limitar o número de questões para evitar cookies grandes demais
+    MAX_QUESTOES_POR_SESSAO = 300
+    if len(questoes) > MAX_QUESTOES_POR_SESSAO:
+        flash(f'Há {len(questoes)} questões. Mostrando as {MAX_QUESTOES_POR_SESSAO} mais distantes.', 'info')
+        questoes = questoes[:MAX_QUESTOES_POR_SESSAO]
+    
     # Guardar IDs das questões na sessão
     session['questoes_revisao'] = [q.id for q in questoes]
     session['indice_atual'] = 0
+    session['modo_estudo'] = 'distantes'
     
     return redirect(url_for('mostrar_questao', modo='distantes'))
 
